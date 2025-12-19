@@ -82,8 +82,8 @@ github: https://github.com/kjhu1211-cpu/IoT-000B
 homepage: https://kjhu1211-cpu.github.io/IoT-000B/
 
 김태연
-github: https://github.com/leo3898/IoT_final_joker
-homepage: https://leo3898.github.io/IoT_final_joker/
+github: https://github.com/leo3898/IoT-000B
+homepage: https://leo3898.github.io/IoT-000B/
 =======
 # This is my homepage
 Joker project !
