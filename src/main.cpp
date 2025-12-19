@@ -1,6 +1,6 @@
 /*
-  Joke Machine - Final Version
-  ESP32 + Make.com (Proxy & Logger) + Google Sheets
+  Joke Machine - Final Version (Time Stamp + Serial Debug Restored)
+  ESP32 + Make.com + Google Sheets + NTP Time
 */
 
 #include <WiFi.h>
@@ -11,6 +11,7 @@
 #include <Adafruit_ILI9341.h>
 #include <Keypad.h>
 #include <ESP32Servo.h>
+#include "time.h"
 
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
@@ -18,6 +19,12 @@ const char* password = "";
 // --- Make.com Configuration ---
 String MAKE_JOKE_URL = "https://hook.eu1.make.com/zy7b0hejxuo8et7phv8spy09pi0jlm1v"; 
 String MAKE_LOG_URL = "https://hook.eu1.make.com/oe62icuevcowayxvinrny6xah977xou3"; 
+
+// --- NTP Time Configuration ---
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 32400; // Korea GMT+9
+const int   daylightOffset_sec = 0;
+String lastUpdateTime = "None"; 
 
 // --- Peripherals Setup ---
 #define TFT_DC 2
@@ -31,12 +38,24 @@ byte rowPins[ROWS] = {27, 26, 25, 33}; byte colPins[COLS] = {32, 17, 16, 22};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 const int BUZZER_PIN = 14; 
-#define BUZZER_CHANNEL 0 // 이거 추가함
+#define BUZZER_CHANNEL 0 
+
 enum MachineState { STATE_MENU, STATE_RATING };
 MachineState currentState = STATE_MENU; 
 
 String currentJoke = ""; 
 String currentCategory = "";
+
+void updateLastTime() {
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    lastUpdateTime = "Time Error";
+    return;
+  }
+  char timeStringBuff[20];
+  strftime(timeStringBuff, sizeof(timeStringBuff), "%p %I:%M", &timeinfo);
+  lastUpdateTime = String(timeStringBuff);
+}
 
 void beep(int f, int d, int p) { tone(BUZZER_PIN, f); delay(d); noTone(BUZZER_PIN); delay(p); }
 
@@ -49,33 +68,30 @@ int normalizeScore(char scoreChar) {
 
 void buzzerLaugh(char scoreChar) {
   int score = normalizeScore(scoreChar);
-
   switch (score) {
-    case 1:
-      beep(700, 120, 200);
-      break;
-
-    case 2:
-      beep(800, 120, 150);
-      beep(800, 120, 150);
-      break;
-
-    case 3:
-      for (int i = 0; i < 3; i++) beep(1000, 120, 100);
-      break;
-
-    case 4:
-      beep(900, 120, 80);
-      beep(1100, 120, 80);
-      beep(1300, 120, 80);
-      beep(1500, 150, 120);
-      break;
-
-    case 5:
-      for (int i = 0; i < 6; i++) {
-        beep(1600, 100, 60);
-        beep(1800, 200, 120);
-      }
+    case 1: beep(700, 120, 200); break;
+    case 2: 
+    beep(800, 120, 150); 
+    delay(50);
+    beep(800, 120, 150); break;
+    case 3: for (int i = 0; i < 3; i++) {
+      beep(1000, 120, 100);
+      delay(50);
+    } 
+    break;
+    case 4: 
+    beep(900, 120, 80); 
+    delay(20);
+    beep(1100, 120, 80); 
+    delay(20);
+    beep(1300, 120, 80); 
+    delay(20);
+    beep(1500, 150, 120); 
+    break;
+    case 5: 
+    for (int i = 0; i < 6; i++) { 
+      beep(1600, 100, 60); 
+      beep(1800, 200, 120); } 
       break;
   }
 }
@@ -84,15 +100,12 @@ void buzzerLaugh(char scoreChar) {
 
 String getJokeFromMake(String category) {
   String finalJoke = "Error: Network";
-  
   if(WiFi.status() != WL_CONNECTED) { WiFi.reconnect(); delay(1000); return "Error: WiFi"; }
 
   WiFiClientSecure *client = new WiFiClientSecure;
-  
   if(client) {
     client->setInsecure(); 
     client->setHandshakeTimeout(20000);
-
     HTTPClient http;
     String url = MAKE_JOKE_URL + "?category=" + category;
     
@@ -100,11 +113,9 @@ String getJokeFromMake(String category) {
 
     if(http.begin(*client, url)) {
       int httpCode = http.GET();
-
       if (httpCode > 0) {
         finalJoke = http.getString();
         Serial.println("[GetJoke] Success!");
-        
         if (finalJoke.length() < 2) finalJoke = "Error: Empty Data";
       } else {
         Serial.printf("[GetJoke] GET Error: %s\n", http.errorToString(httpCode).c_str());
@@ -113,43 +124,30 @@ String getJokeFromMake(String category) {
       http.end();
     } else {
       Serial.println("[GetJoke] Connect Failed");
-      finalJoke = "Error: Connect Failed";
     }
     delete client; 
-  } else {
-    Serial.println("[System] Heap Full");
-    finalJoke = "Error: Heap Full";
   }
-  
   return finalJoke;
 }
 
 bool sendLogToMake(String category, String joke, int rating) {
   bool success = false;
-
   if(WiFi.status() != WL_CONNECTED) { WiFi.reconnect(); delay(1000); return false; }
 
   Serial.println("[Logger] Sending Log...");
-  
   WiFiClientSecure *client = new WiFiClientSecure;
   if(client) {
     client->setInsecure();
-    client->setHandshakeTimeout(20000);
-
     HTTPClient http;
     if(http.begin(*client, MAKE_LOG_URL)) {
       http.addHeader("Content-Type", "application/json");
-
       StaticJsonDocument<1024> doc;
       doc["category"] = category;
       doc["joke"] = joke;
       doc["rating"] = rating; 
-
       String jsonPayload;
       serializeJson(doc, jsonPayload);
-
       int httpCode = http.POST(jsonPayload);
-      
       if (httpCode > 0) {
         Serial.printf("[Logger] Success! Status: %d\n", httpCode);
         success = true;
@@ -159,44 +157,34 @@ bool sendLogToMake(String category, String joke, int rating) {
       http.end();
     }
     delete client; 
-  } else {
-    Serial.println("[Logger] Heap Full");
   }
   return success;
 }
 
-// --- Main Logic ---
-
 void nextJoke(String category) {
   currentCategory = category;
-
   tft.setTextColor(ILI9341_WHITE);
   tft.println("\nFetching via Make...");
 
   String rawData = getJokeFromMake(category);
-
   while (rawData.startsWith("Error")) {
-    tft.setTextColor(ILI9341_RED);
-    tft.print("."); 
+    tft.setTextColor(ILI9341_RED); tft.print("."); 
     Serial.println("[Retry] Fetching again...");
     delay(2000); 
     rawData = getJokeFromMake(category);
   }
   
+  updateLastTime();
+
   String englishPart = "";
   String koreanPart = "";
-  
   int splitIndex = rawData.indexOf("|||"); 
 
   if (splitIndex > 0) {
-    englishPart = rawData.substring(0, splitIndex);
-    englishPart.trim(); 
-    
-    koreanPart = rawData.substring(splitIndex + 3);
-    koreanPart.trim();
+    englishPart = rawData.substring(0, splitIndex); englishPart.trim(); 
+    koreanPart = rawData.substring(splitIndex + 3); koreanPart.trim();
   } else {
-    englishPart = rawData;
-    koreanPart = "Translation missing.";
+    englishPart = rawData; koreanPart = "Translation missing.";
   }
 
   tft.fillScreen(ILI9341_BLACK); 
@@ -204,6 +192,7 @@ void nextJoke(String category) {
   tft.setTextColor(ILI9341_GREEN);
   tft.println(englishPart);
 
+  // 시리얼 모니터 출력 복구
   Serial.println("\n[Korean Translation]");
   Serial.println(koreanPart);
   Serial.println("--------------------\n");
@@ -215,6 +204,11 @@ void showMenu() {
   currentState = STATE_MENU;
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_LIGHTGREY);
+  tft.setTextSize(1);
+  tft.print("Last Joke Update: ");
+  tft.println(lastUpdateTime);
+  tft.println("--------------------------------");
   tft.setTextColor(ILI9341_YELLOW);
   tft.setTextSize(2);
   tft.println("\nSelect Category:\n1:Misc 2:Prog\n3:Dark 4:Pun\n5:Spooky 6:X-mas\n7:Any");
@@ -222,24 +216,19 @@ void showMenu() {
 
 void showRatingThankYou(char score) {
   int ratingInt = score - '0';
-  tft.setTextColor(ILI9341_CYAN);
-  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_CYAN); tft.setTextSize(2);
   tft.printf("\n\nRating: %d/5\nSaving Log...\n", ratingInt);
   buzzerLaugh(score);
 
   bool isSent = sendLogToMake(currentCategory, currentJoke, ratingInt);
-  
   while (!isSent) {
-    tft.setTextColor(ILI9341_RED);
-    tft.print("Retry..."); 
+    tft.setTextColor(ILI9341_RED); tft.print("Retry..."); 
     Serial.println("[Retry] Sending log again in 2s...");
-    
     delay(2000); 
     isSent = sendLogToMake(currentCategory, currentJoke, ratingInt);
   }
 
-  tft.setTextColor(ILI9341_GREEN);
-  tft.println("Saved!");
+  tft.setTextColor(ILI9341_GREEN); tft.println("Saved!");
   delay(1500); 
   showMenu(); 
 }
@@ -250,12 +239,14 @@ void setup() {
   WiFi.begin(ssid, password, 6);
 
   ledcSetup(BUZZER_CHANNEL, 2000, 8);
-  ledcAttachPin(BUZZER_PIN, BUZZER_CHANNEL); // 얘네 추가함
+  ledcAttachPin(BUZZER_PIN, BUZZER_CHANNEL);
 
   tft.begin(); tft.setRotation(1);
   tft.setTextColor(ILI9341_WHITE); tft.setTextSize(2);
   tft.print("Connecting WiFi");
   while (WiFi.status() != WL_CONNECTED) { delay(100); tft.print("."); }
+  
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
