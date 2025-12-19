@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🃏 Joker: IoT-based Smart Joke Machine
 
 [![ESP32](https://img.shields.io/badge/Device-ESP32-red)]()
@@ -83,3 +84,16 @@ homepage: https://kjhu1211-cpu.github.io/IoT-000B/
 김태연
 github: https://github.com/leo3898/IoT_final_joker
 homepage: https://leo3898.github.io/IoT_final_joker/
+=======
+# This is my homepage
+Joker project !
+
+We are going to improve the joke machine by adding various sensors and tools to the joke machine 
+
+1.  Joke Rating (via Keypad)
+2.  "Laughing" Motion (Servo & Buzzer)
+3.  Joke Category Selection
+4.  Automatic LCD Brightness (Photoresistor)
+5.  New Joke Request (Accelerometer Shake/Tap)
+6.  Automatic Korean Translation
+>>>>>>> 4a96d0b70b77ca1d1efe6bba4ac112d01e8724a4
