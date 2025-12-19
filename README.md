@@ -96,4 +96,4 @@ We are going to improve the joke machine by adding various sensors and tools to 
 4.  Automatic LCD Brightness (Photoresistor)
 5.  New Joke Request (Accelerometer Shake/Tap)
 6.  Automatic Korean Translation
->>>>>>> 4a96d0b70b77ca1d1efe6bba4ac112d01e8724a4
+
