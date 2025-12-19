@@ -106,7 +106,7 @@
                       <a href="https://github.com/kjhu1211-cpu" target="_blank">강정후</a><sup>2</sup>,
                     </span>
                     <span class="author-block">
-                      <a href="https://github.com/leo3898" target="_blank">김태연</a><sup>3</sup>
+                      <a href="https://github.com/leo3898" target="_blank">김태연 (Me)</a><sup>3</sup>
                     </span>  <br>
                     <span class="author-block">
                       <a href="https://github.com/zubair1811"  target="_blank">Class Incharge: Muhammad Zubair Islam</a><sup>4</sup>,
@@ -269,7 +269,7 @@
               </thead>
               <tbody>
                 <tr>
-                  <td class="has-text-centered"><strong>김주현 (Me)</strong></td>
+                  <td class="has-text-centered"><strong>김주현</strong></td>
                   <td>
                     <ul>
                         <li>Cloud-Offloaded Proxy Architecture Design (Make.com)</li>
@@ -290,7 +290,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td class="has-text-centered"><strong>김태연</strong></td>
+                  <td class="has-text-centered"><strong>김태연 (Me)</strong></td>
                   <td>
                     <ul>
                       <li>Developed Rating System</li>
@@ -317,68 +317,70 @@
             </h2>
             
            <div class="content has-text-justified">
-            <p>The core focus was on establishing a reliable data synchronization pipeline between the physical device and the cloud database. This involved managing real-time inputs, automated sorting logic, and addressing simulation constraints.</p>
+            <p>The core focus of my task was establishing a reliable <strong>Cloud-DB synchronization pipeline</strong> and optimizing the user interface for real-time feedback. I managed the end-to-end flow from physical input to automated server-side data processing.</p>
 
             <h4 class="title is-4">1. Data Logging & Rating System</h4>
             <div style="text-align: center; margin: 20px 0;">
                 <img src="static/images/google_sheet.png" alt="Google Sheet Storage" style="max-width: 90%; height: auto; border-radius: 10px; border: 1px solid #ddd;">
-                <p class="is-size-5" style="font-weight: bold; color: #4a4a4a; margin-top: 10px;">Joke Database in Google Sheets</p>
+                <p class="is-size-6" style="font-weight: bold; color: #4a4a4a; margin-top: 10px;">Joke Database & Rating Records in Google Sheets</p>
             </div>
-            <p>
-              The system utilizes a <strong>4x4 Keypad</strong> to interact with users. When a joke is displayed, users can enter a score from <strong>1 to 5</strong> via the keypad. 
-              <br> 1) User presses a numeric key (1-5) on the keypad.
-              <br> 2) The ESP32 captures the input and transmits the rating along with the joke's unique ID to the cloud.
-              <br> 3) The data is instantly stored in <strong>Google Sheets</strong>, maintaining a record of original jokes, Korean translations, and user-assigned ratings.
-            </p>
+            <p>I implemented an interactive rating system using a <strong>4x4 Keypad</strong> to bridge the gap between user experience and data collection:</p>
+            <ul>
+                <li><strong>Keypad Interaction:</strong> Users can rate a joke from <strong>1 to 5</strong> immediately after reading by pressing the corresponding numeric key.</li>
+                <li><strong>Transmission:</strong> The ESP32 captures this input and transmits the rating along with the joke's unique ID to the cloud.</li>
+                <li><strong>Storage:</strong> Data is logged in <strong>Google Sheets</strong>, maintaining a persistent database for original jokes, Korean translations, and user-assigned ratings.</li>
+            </ul>
 
-            <h4 class="title is-4">2. Automated Sorting via App Script & Triggers</h4>
+            <h4 class="title is-4">2. Automated Sorting (App Script & Trigger)</h4>
             <div class="columns is-centered" style="margin: 20px 0;">
               <div class="column is-half has-text-centered">
                   <img src="static/images/app_script.png" alt="App Script Code" style="width: 100%; border-radius: 10px;">
-                  <p style="font-weight: bold;">Custom Google App Script</p>
+                  <p style="font-weight: bold;">Google App Script Logic</p>
               </div>
               <div class="column is-half has-text-centered">
                   <img src="static/images/trigger.png" alt="Script Trigger" style="width: 100%; border-radius: 10px;">
-                  <p style="font-weight: bold;">Event-Driven Trigger</p>
+                  <p style="font-weight: bold;">Automation Trigger</p>
               </div>
             </div>
-            <p>
-              To create a dynamic leaderboard, I implemented server-side automation using <strong>Google App Script</strong>.
-              <br> 1) <strong>App Script Logic:</strong> A custom script was written to identify the rating column and sort the entire sheet in <strong>descending order</strong> whenever new data is added.
-              <br> 2) <strong>Trigger Integration:</strong> A "On Change" or "On Edit" trigger was set up to ensure the ranking is updated immediately without manual intervention. This ensures that the 'Hall of Fame' always displays the highest-rated jokes at the top.
-            </p>
+            <p>To automate the leaderboard management, I developed a server-side sorting logic:</p>
+            <ul>
+                <li><strong>Custom Scripting:</strong> Wrote a <strong>Google App Script</strong> to monitor the rating column and sort the entire database in <strong>descending order</strong> automatically.</li>
+                <li><strong>Trigger Mechanism:</strong> Set up an <strong>Event-driven Trigger</strong> (On Edit) that executes the sorting script the moment a new rating is added, ensuring the Hall of Fame is always current.</li>
+            </ul>
 
-            <h4 class="title is-4">3. Wokwi Simulator Constraints</h4>
+            <h4 class="title is-4">3. Simulation Constraints & Debugging</h4>
             <div class="columns is-centered" style="margin: 20px 0;">
               <div class="column is-half has-text-centered">
-                  <img src="static/images/ranking_1.png" alt="Category Selection" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
+                  <img src="static/images/ranking_1.png" alt="Ranking Menu" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
                   <p style="font-weight: bold;">Ranking Menu (Key 'A')</p>
               </div>
               <div class="column is-half has-text-centered">
-                  <img src="static/images/ranking_2.png" alt="Loading Rank" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
-                  <p style="font-weight: bold;">Loading Screen</p>
+                  <img src="static/images/ranking_2.png" alt="Loading Screen" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
+                  <p style="font-weight: bold;">Fetching Cloud Data</p>
               </div>
             </div>
-            <p>
-              While the ranking logic is fully implemented, a technical limitation was encountered within the <strong>Wokwi Simulator</strong>. Due to the simulator's restrictive <strong>HTTPS connection handling</strong>, retrieving the sorted ranking data to display on the ILI9341 LCD panel was inconsistent. However, this is a platform-specific issue; utilizing a physical ESP32 module would fully resolve these connection blocks, allowing for a seamless 'Top Ranking' display on the device.
-            </p>
+            <blockquote>
+                <strong>Technical Problem:</strong> During integration within the <strong>Wokwi Simulator</strong>, we faced persistent <strong>HTTPS handshake failures</strong> when pulling sorted ranking data to the LCD panel.
+                <br><br>
+                <strong>Observation:</strong> This is a simulator-specific network restriction. While the LCD displays a 'Loading' state in Wokwi, the logic is fully verified. <strong>Using physical ESP32 hardware</strong> would resolve these connection blocks, enabling a seamless Ranking display.
+            </blockquote>
 
-            <h4 class="title is-4">4. Evolution of Time Tracking Features</h4>
+            <h4 class="title is-4">4. Evolution of Time Tracking Feature</h4>
             <div class="columns is-centered" style="margin: 20px 0;">
               <div class="column is-half has-text-centered">
                   <img src="static/images/time_update.png" alt="Relative Time" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
-                  <p style="font-weight: bold;">Initial: Elapsed Seconds</p>
+                  <p style="font-weight: bold;">V1: Elapsed Seconds</p>
               </div>
               <div class="column is-half has-text-centered">
                   <img src="static/images/time_update2.png" alt="Absolute Time" style="width: 80%; border-radius: 5px; background: #000; padding: 5px;">
-                  <p style="font-weight: bold;">Final: Last Update Timestamp</p>
+                  <p style="font-weight: bold;">V2: Final Timestamp Display</p>
               </div>
             </div>
-            <p>
-              The user interface for time tracking underwent significant iteration. 
-              Initially, a feature was added to show <strong>how many seconds had elapsed</strong> since the last joke update. However, this caused synchronization conflicts with external APIs and offered limited value to the user. 
-              The design was refined to show the <strong>exact time of the last update</strong> (e.g., PM 10:55), providing a clearer and more stable reference for data freshness.
-            </p>
+            <p>I refined the "Last Update" feature to improve both technical stability and user readability:</p>
+            <ul>
+                <li><strong>The Pivot:</strong> Initially, I implemented a feature showing <strong>elapsed seconds</strong> (V1) since the last update. However, this caused synchronization crashes with external APIs and offered less intuitive value.</li>
+                <li><strong>Final Logic:</strong> I transitioned to a <strong>static timestamp display</strong> (V2) showing the exact time of the last successful retrieval. This improved network stability and provided a much clearer reference for the user.</li>
+            </ul>
            </div>
           </div> 
         </div>
